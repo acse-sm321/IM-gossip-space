@@ -32,8 +32,8 @@ Feel free to fork and make pull requests. Raise issues or comments are welcomed.
 - [Ajax](https://developer.mozilla.org/en-US/docs/Web/Guide/AJAX)
 - [Nginx](https://www.nginx.com/)
 
-## Acknowledgement
-: heart : Friendly Gophers.
+## : heart : Acknowledgement
+Friendly Gophers.
 
 ## License
 - [GNU General Public License v3.0](https://github.com/acse-sm321/IM-gossip-space/blob/main/LICENSE)
