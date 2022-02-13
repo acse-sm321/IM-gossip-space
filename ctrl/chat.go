@@ -84,28 +84,25 @@ func Chat(writer http.ResponseWriter,
 	id := query.Get("id")
 	token := query.Get("token")
 	userId, _ := strconv.ParseInt(id, 10, 64)
-	isvalid := checkToken(userId, token)
+	isvalida := checkToken(userId, token)
 	//如果isvalida=true
 	//isvalida=false
-	log.Println(id, token, isvalid)
+	log.Println(id, token, isvalida)
 	conn, err := (&websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
-			return isvalid
+			return isvalida
 		},
 	}).Upgrade(writer, request, nil)
-
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-
 	//todo 获得conn
 	node := &Node{
 		Conn:      conn,
-		DataQueue: make(chan []byte, 50), // parallel to serial code
+		DataQueue: make(chan []byte, 50),
 		GroupSets: set.New(set.ThreadSafe),
 	}
-
 	//todo 获取用户全部群Id
 	comIds := contactService.SearchComunityIds(userId)
 	for _, v := range comIds {
@@ -115,7 +112,6 @@ func Chat(writer http.ResponseWriter,
 	rwlocker.Lock()
 	clientMap[userId] = node
 	rwlocker.Unlock()
-
 	//todo 完成发送逻辑,con
 	go sendproc(node)
 	//todo 完成接收逻辑
@@ -137,7 +133,7 @@ func AddGroupId(userId, gid int64) {
 	//添加gid到set
 }
 
-//websocket发送协程
+//ws发送协程
 func sendproc(node *Node) {
 	for {
 		select {
@@ -151,7 +147,7 @@ func sendproc(node *Node) {
 	}
 }
 
-//websocket 接收协程
+//ws接收协程
 func recvproc(node *Node) {
 	for {
 		_, data, err := node.Conn.ReadMessage()
@@ -272,7 +268,7 @@ func sendMsg(userId int64, msg []byte) {
 	}
 }
 
-// check whether the token is valid
+//检测是否有效
 func checkToken(userId int64, token string) bool {
 	//从数据库里面查询并比对
 	user := userService.Find(userId)

@@ -38,9 +38,17 @@ use cURL to check the HTTP responses.
 ## Deployment
 TODO: How to deploy on a Linux server, set up Nginx reverse proxy
 ```
-$
+$ vim build.sh
+rm -rf ./release
+mkdir  release
+go build -o chat
+chmod +x ./chat
+cp chat ./release/
+cp favicon.ico ./release/
+cp -arf ./asset ./release/
+cp -arf ./view ./release/
 ```
-Notice: Do not deploy this project to your server directly, take this as an reference of chat room application instead.
+Notice: Do not deploy this project to your server, take this project as an reference of chat room application instead.
 
 ## Contribution
 Please fork and make pull requests. Raise issues or comments are welcomed.
@@ -49,15 +57,27 @@ Please fork and make pull requests. Raise issues or comments are welcomed.
 - [Instant Messaging System](https://cloud.tencent.com/developer/article/1658166)
 - [Gorilla WebSocket](https://github.com/gorilla/websocket)
 - [go-redis](https://github.com/go-redis/redis)
-- [xorm](https://pkg.go.dev/github.com/go-xorm/xorm)
 - [gorm](https://gorm.io/index.html)
-- [go-sql-driver](https://github.com/go-sql-driver/mysql)
 - [Vue.js](https://vuejs.org/)
 - [Ajax](https://developer.mozilla.org/en-US/docs/Web/Guide/AJAX)
 - [Nginx](https://www.nginx.com/)
+- [oss]()
+
+## Update & Troubleshooting
+```
+#  Update details
+- 1. xorm is not maintained anymore, will use gorm instead.
+- 2. try to use go-redis to improve the performance
+- 3. try to deloy using Nginx and see if it works
+
+#  Trouble shooting
+- 1.
+```
 
 ## Acknowledgement
 :heartpulse: Friendly Gophers.
+
+
 
 ## License & Copyright
 - [GNU General Public License v3.0](https://github.com/acse-sm321/IM-gossip-space/blob/main/LICENSE)

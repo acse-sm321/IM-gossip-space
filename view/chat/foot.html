@@ -244,7 +244,7 @@
                     var msg =this.createmsgcontext();
                     msg.media=1;
                     msg.content=txt;
-                    this.showmsg(userInfo(),msg);
+                    this.showmsg(userInfo(),msg);// show the message you are sending
                     this.webSocket.send(JSON.stringify(msg))
                 },
                 sendpicmsg:function(picurl){

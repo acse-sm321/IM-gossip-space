@@ -5,19 +5,25 @@ import (
 	"IM-gossip-space/util"
 	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"math/rand"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type UserService struct {
 }
 
-// user registeration
-func (s *UserService) Register(mobile, plainpsswd, nickname, avatar, sex string) (user model.User, err error) {
+//注册函数
+func (s *UserService) Register(
+	mobile, //手机
+	plainpwd, //明文密码
+	nickname, //昵称
+	avatar, sex string) (user model.User, err error) {
+
 	//检测手机号码是否存在,
 	tmp := model.User{}
-	_, err = DbEngine.Where("mobile=? ", mobile).Get(&tmp)
+	_, err = DbEngin.Where("mobile=? ", mobile).Get(&tmp)
 	if err != nil {
 		return tmp, err
 	}
@@ -31,7 +37,7 @@ func (s *UserService) Register(mobile, plainpsswd, nickname, avatar, sex string)
 	tmp.Nickname = nickname
 	tmp.Sex = sex
 	tmp.Salt = fmt.Sprintf("%06d", rand.Int31n(10000))
-	tmp.Passwd = util.MakePasswd(plainpsswd, tmp.Salt)
+	tmp.Passwd = util.MakePasswd(plainpwd, tmp.Salt)
 	tmp.Createat = time.Now()
 	//token 可以是一个随机数
 	tmp.Token = fmt.Sprintf("%08d", rand.Int31())
@@ -40,23 +46,26 @@ func (s *UserService) Register(mobile, plainpsswd, nickname, avatar, sex string)
 	//返回新用户信息
 
 	//插入 InserOne
-	_, err = DbEngine.InsertOne(&tmp)
+	_, err = DbEngin.InsertOne(&tmp)
 	//前端恶意插入特殊字符
 	//数据库连接操作失败
 	return tmp, err
 }
 
-func (s *UserService) Login(mobile, plainpsswd string) (user model.User, err error) {
-	// search the user by mobile number
+//登录函数
+func (s *UserService) Login(
+	mobile, //手机
+	plainpwd string) (user model.User, err error) {
+
 	//首先通过手机号查询用户
 	tmp := model.User{}
-	_, err = DbEngine.Where("mobile = ?", mobile).Get(&tmp)
+	_, err = DbEngin.Where("mobile = ?", mobile).Get(&tmp)
 	//如果没有找到
 	if tmp.Id == 0 {
 		return tmp, errors.New("该用户不存在")
 	}
 	//查询到了比对密码
-	if !util.ValidatePasswd(plainpsswd, tmp.Salt, tmp.Passwd) {
+	if !util.ValidatePasswd(plainpwd, tmp.Salt, tmp.Passwd) {
 		return tmp, errors.New("密码不正确")
 	}
 	//刷新token,安全
@@ -64,15 +73,15 @@ func (s *UserService) Login(mobile, plainpsswd string) (user model.User, err err
 	token := util.MD5Encode(str)
 	tmp.Token = token
 	//返回数据
-	_, err = DbEngine.Where(" id = ?", tmp.Id).Cols("token").Update(&tmp)
+	_, err = DbEngin.Where(" id = ?", tmp.Id).Cols("token").Update(&tmp)
 	return tmp, err
 }
 
-// Find user by userID
+//查找某个用户
 func (s *UserService) Find(userId int64) (user model.User) {
 
 	//首先通过手机号查询用户
 	tmp := model.User{}
-	DbEngine.Where("id = ?", userId).Get(&tmp)
+	DbEngin.Where("id = ?", userId).Get(&tmp)
 	return tmp
 }

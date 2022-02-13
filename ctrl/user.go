@@ -4,48 +4,72 @@ import (
 	"IM-gossip-space/model"
 	"IM-gossip-space/service"
 	"IM-gossip-space/util"
-	"fmt"
-	"math/rand"
 	"net/http"
 )
 
-func UserLogin(writer http.ResponseWriter, request *http.Request) {
-	// write database operations and logics here
-	// if restAPI return json/xml
-
-	// 1. read username and password from SPA
+func UserLogin(writer http.ResponseWriter,
+	request *http.Request) {
+	//数据库操作
+	//逻辑处理
+	//restapi json/xml返回
+	//1.获取前端传递的参数
+	//mobile,passwd
+	//解析参数
+	//如何获得参数
+	//解析参数
 	request.ParseForm()
+
 	mobile := request.PostForm.Get("mobile")
 	passwd := request.PostForm.Get("passwd")
 
-	//curl http://localhost:8080/user/login -X POST -d "mobile=15912465670&passwd=123456"
+	//模拟
 	user, err := userService.Login(mobile, passwd)
-	//if mobile == "15912465670" && passwd == "123456" {
-	//	login_success = true
-	//}
 
 	if err != nil {
-		// set header and relevant responses
 		util.RespFail(writer, err.Error())
 	} else {
 		util.RespOk(writer, user, "")
 	}
+
 }
 
 var userService service.UserService
 
-func UserRegister(writer http.ResponseWriter, request *http.Request) {
-	request.ParseForm()
-	mobile := request.PostForm.Get("mobile")
-	plainpasswd := request.PostForm.Get("passwd")
-	nickName := fmt.Sprintf("user%06d", rand.Int31())
-	avatar := ""
-	sex := model.SEX_UNKNOW
-	user, err := userService.Register(mobile, plainpasswd, nickName, avatar, sex)
+func UserRegister(writer http.ResponseWriter,
+	request *http.Request) {
+
+	//request.ParseForm()
+	//
+	//mobile := request.PostForm.Get("mobile")
+	//
+	//plainpwd := request.PostForm.Get("passwd")
+	//nickname := fmt.Sprintf("user%06d",rand.Int31())
+	//avatar :=""
+	//sex := model.SEX_UNKNOW
+	//有了数据绑定方法,不需要其他的啦
+	var user model.User
+	util.Bind(request, &user)
+	user, err := userService.Register(user.Mobile, user.Passwd, user.Nickname, user.Avatar, user.Sex)
 	if err != nil {
 		util.RespFail(writer, err.Error())
 	} else {
 		util.RespOk(writer, user, "")
+
+	}
+
+}
+
+//解析一下
+func FindUserById(writer http.ResponseWriter,
+	request *http.Request) {
+	var user model.User
+	util.Bind(request, &user)
+	user = userService.Find(user.Id)
+	if user.Id == 0 {
+		util.RespFail(writer, "该用户不存在")
+	} else {
+		util.RespOk(writer, user, "")
+
 	}
 
 }
