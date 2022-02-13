@@ -1,79 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"IM-gossip-space/ctrl"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
 	"net/http"
-	"xorm.io/xorm"
 )
-
-func user_login(writer http.ResponseWriter, request *http.Request) {
-	// write database operations and logics here
-	// if restAPI return json/xml
-
-	// 1. read username and password from SPA
-	request.ParseForm()
-	mobile := request.PostForm.Get("mobile")
-	passwd := request.PostForm.Get("passwd")
-
-	login_success := false
-	//curl http://localhost:8080/user/login -X POST -d "mobile=15912465670&passwd=123456"
-	if mobile == "15912465670" && passwd == "123456" {
-		login_success = true
-	}
-	if !login_success {
-		// set header and relevant responses
-		Respond(writer, -1, nil, "Password or Username incorrect!")
-
-	} else {
-		data := make(map[string]interface{})
-		data["id"] = 1
-		data["token"] = "test"
-		Respond(writer, 0, data, "")
-	}
-}
-
-// define a struct to store the header information
-type H struct {
-	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
-	Data interface{} `json:"data,omitempty"`
-}
-
-var DbEngine *xorm.Engine
-
-func init() {
-	drivername := "mysql"
-	DsName := "root:root@(127.0.0.1:3306)/chat?charset=utf8"
-	DbEngine, err := xorm.NewEngine(drivername, DsName)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	DbEngine.ShowSQL(true)      // show sql
-	DbEngine.SetMaxOpenConns(2) // set max conn count
-	// automatic user constructor
-	//DbEngine.Sync2(new(User))
-	fmt.Println("Init database OK")
-}
-
-func Respond(w http.ResponseWriter, code int, data interface{}, msg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	// define a struct and convert to json
-	h := H{
-		Code: code,
-		Msg:  msg,
-		Data: data,
-	}
-	ret, err := json.Marshal(h)
-	if err != nil {
-		log.Println(err.Error())
-	}
-	w.Write([]byte(ret))
-}
 
 func RegisterView() {
 	// note the directory here
@@ -91,7 +25,30 @@ func RegisterView() {
 
 func main() {
 	//bind the request and handler function
-	http.HandleFunc("/user/login", user_login)
+	//绑定请求和处理函数
+	http.HandleFunc("/user/login", ctrl.UserLogin)
+	//http.HandleFunc("/user/find", ctrl.FindUserById)
+	http.HandleFunc("/user/register", ctrl.UserRegister)
+	http.HandleFunc("/contact/loadcommunity", ctrl.LoadCommunity)
+	http.HandleFunc("/contact/loadfriend", ctrl.LoadFriend)
+	http.HandleFunc("/contact/joincommunity", ctrl.JoinCommunity)
+	http.HandleFunc("/contact/createcommunity", ctrl.CreateCommunity)
+	//http.HandleFunc("/contact/addfriend", ctrl.Addfriend)
+	http.HandleFunc("/contact/addfriend", ctrl.Addfriend)
+	http.HandleFunc("/chat", ctrl.Chat)
+	//http.HandleFunc("/attach/upload", ctrl.Upload)
+	//1 提供静态资源目录支持
+	//http.Handle("/", http.FileServer(http.Dir(".")))
+
+	//2 指定目录的静态文件
+	http.Handle("/asset/", http.FileServer(http.Dir(".")))
+	http.Handle("/mnt/", http.FileServer(http.Dir(".")))
+
+	RegisterView()
+	//RegisterIndex()
+
+	fmt.Println("run at :8080")
+	http.ListenAndServe(":8080", nil)
 
 	//provide static resource support: File server
 	//provide designated directory for encapsulation
